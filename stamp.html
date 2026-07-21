@@ -10,7 +10,6 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAxesRcqeqRsL2qQ2zMHcQLBS5e4emTF-g",
@@ -24,17 +23,22 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth();
 
-    // ★★★ 匿名ログイン（絶対に消えない userId） ★★★
-    await signInAnonymously(auth);
-    const userId = auth.currentUser.uid;
+    // ★★★ ユーザーごとに userId を自動生成（index.html と同じ） ★★★
+    let userId = localStorage.getItem("userId");
+    if (!userId) {
+      userId = crypto.randomUUID();   // 初回アクセス時に一意のIDを発行
+      localStorage.setItem("userId", userId);
+    }
 
+    // URL から spot を取得
     const params = new URLSearchParams(window.location.search);
     const spot = params.get("spot");
 
+    // Firestore の保存先（ユーザーごとに分かれる）
     const ref = doc(db, "users", userId, "stamps", spot);
 
+    // Firestore に保存
     setDoc(ref, {
       acquired: true,
       time: new Date()
@@ -43,6 +47,7 @@
       document.getElementById("status").innerText =
         `スタンプ「${spot}」を獲得しました！`;
 
+      // 3秒後に一覧へ戻る
       setTimeout(() => {
         window.location.href = "index.html";
       }, 3000);
