@@ -2,17 +2,16 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>スタンプ一覧</title>
+  <title>スタンプ獲得</title>
 </head>
 <body>
-  <h2>スタンプ一覧</h2>
-  <div id="list">読み込み中...</div>
+  <h2 id="status">スタンプ獲得中...</h2>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+  <!-- Firebase SDK v9 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  <script>
     // ★★★ あなたの Firebase 設定 ★★★
     const firebaseConfig = {
       apiKey: "AIzaSyAxesRcqeqRsL2qQ2zMHcQLBS5e4emTF-g",
@@ -25,37 +24,36 @@
     };
 
     // Firebase 初期化
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    // 仮ユーザーID（stamp.html と合わせてある）
+    // URL から spot を取得
+    const params = new URLSearchParams(window.location.search);
+    const spot = params.get("spot");
+
+    // 仮ユーザーID
     const userId = "test-user";
 
-    // 表示するスポット一覧（必要なら増やせる）
-    const spots = ["spot1", "spot2", "spot3"];
+    // Firestore に保存
+    const ref = doc(db, "users", userId, "stamps", spot);
 
-    async function loadStamps() {
-      const listDiv = document.getElementById("list");
+    setDoc(ref, {
+      acquired: true,
+      time: new Date()
+    })
+    .then(() => {
+      document.getElementById("status").innerText =
+        `スタンプ「${spot}」を獲得しました！`;
 
-      let html = "";
-
-      for (const spot of spots) {
-        const docRef = db.collection("users")
-                         .doc(userId)
-                         .collection("stamps")
-                         .doc(spot);
-
-        const snap = await docRef.get();
-
-        const got = snap.exists();  // 獲得済みかどうか
-
-        html += `<p>${spot}：${got ? "🟢獲得済み" : "⚪未獲得"}</p>`;
-      }
-
-      listDiv.innerHTML = html;
-    }
-
-    loadStamps();
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 3000);
+    })
+    .catch((error) => {
+      document.getElementById("status").innerText =
+        "スタンプ獲得に失敗しました…";
+      console.error(error);
+    });
   </script>
 </body>
 </html>
