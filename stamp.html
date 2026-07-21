@@ -7,11 +7,11 @@
 <body>
   <h2 id="status">スタンプ獲得中...</h2>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+  <!-- Firebase SDK v9 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  <script>
     // ★★★ あなたの Firebase 設定 ★★★
     const firebaseConfig = {
       apiKey: "AIzaSyAxesRcqeqRsL2qQ2zMHcQLBS5e4emTF-g",
@@ -24,39 +24,36 @@
     };
 
     // Firebase 初期化
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
     // URL から spot を取得
     const params = new URLSearchParams(window.location.search);
     const spot = params.get("spot");
 
-    // ★ 仮ユーザーID（必要なら後でログイン機能に変更可能）
+    // 仮ユーザーID
     const userId = "test-user";
 
     // Firestore に保存
-    db.collection("users")
-      .doc(userId)
-      .collection("stamps")
-      .doc(spot)
-      .set({
-        acquired: true,
-        time: new Date()
-      })
-      .then(() => {
-        document.getElementById("status").innerText =
-          `スタンプ「${spot}」を獲得しました！`;
+    const ref = doc(db, "users", userId, "stamps", spot);
 
-        // 3秒後に index.html に戻る
-        setTimeout(() => {
-          window.location.href = "index.html";
-        }, 3000);
-      })
-      .catch((error) => {
-        document.getElementById("status").innerText =
-          "スタンプ獲得に失敗しました…";
-        console.error(error);
-      });
+    setDoc(ref, {
+      acquired: true,
+      time: new Date()
+    })
+    .then(() => {
+      document.getElementById("status").innerText =
+        `スタンプ「${spot}」を獲得しました！`;
+
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 3000);
+    })
+    .catch((error) => {
+      document.getElementById("status").innerText =
+        "スタンプ獲得に失敗しました…";
+      console.error(error);
+    });
   </script>
 </body>
 </html>
