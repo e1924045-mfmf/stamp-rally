@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h2>スタンプ一覧</h2>
+<div id="list"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAxesRcqeqRsL2qQ2zMHcQLBS5e4emTF-g",
+  authDomain: "stamp-50bf1.firebaseapp.com",
+  projectId: "stamp-50bf1",
+  storageBucket: "stamp-50bf1.firebasestorage.app",
+  messagingSenderId: "618539694181",
+  appId: "1:618539694181:web:bf97371ca424d67cc5eae8c",
+  measurementId: "G-NPVD4BBHRD"
+};
+
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const userId = "test_user";
+
+async function loadStamps() {
+  const ref = doc(db, "users", userId);
+  const snap = await getDoc(ref);
+
+  const stamps = snap.exists() ? snap.data().stamps : [];
+
+  const spots = ["spot1", "spot2", "spot3"];
+
+  let html = "";
+  for (const s of spots) {
+    const got = stamps.includes(s);
+    html += `<p>${s}：${got ? "🟢獲得済み" : "⚪未獲得"}</p>`;
+  }
+
+  document.getElementById("list").innerHTML = html;
+}
+
+loadStamps();
+</script>
+</body>
+</html>
