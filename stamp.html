@@ -7,12 +7,10 @@
 <body>
   <h2 id="status">スタンプ獲得中...</h2>
 
-  <!-- Firebase SDK v9 -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // ★★★ あなたの Firebase 設定 ★★★
     const firebaseConfig = {
       apiKey: "AIzaSyAxesRcqeqRsL2qQ2zMHcQLBS5e4emTF-g",
       authDomain: "stamp-50bf1.firebaseapp.com",
@@ -23,18 +21,14 @@
       measurementId: "G-NPVD4BBHRD"
     };
 
-    // Firebase 初期化
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // URL から spot を取得
     const params = new URLSearchParams(window.location.search);
     const spot = params.get("spot");
 
-    // 仮ユーザーID
     const userId = "test-user";
 
-    // Firestore に保存
     const ref = doc(db, "users", userId, "stamps", spot);
 
     setDoc(ref, {
